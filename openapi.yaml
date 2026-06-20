@@ -1,0 +1,207 @@
+openapi: 3.1.0
+info:
+  title: Notes API
+  version: 1.0.0
+  description: >
+    A simple CRUD API for managing notes. Backed by an in-memory repository
+    that is designed to swap for AWS DynamoDB (Notes table, partition key noteId).
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+tags:
+  - name: notes
+    description: Note management operations
+
+paths:
+  /notes:
+    post:
+      summary: Create a note
+      operationId: createNote
+      tags: [notes]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNoteRequest'
+            example:
+              text: "Buy groceries"
+      responses:
+        '201':
+          description: Note created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateNoteResponse'
+              example:
+                noteId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    get:
+      summary: List all notes
+      operationId: listNotes
+      tags: [notes]
+      responses:
+        '200':
+          description: A list of all notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NoteResponse'
+
+  /notes/{noteId}:
+    parameters:
+      - $ref: '#/components/parameters/NoteId'
+
+    get:
+      summary: Get a note by ID
+      operationId: getNote
+      tags: [notes]
+      responses:
+        '200':
+          description: The requested note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: Update a note's text
+      operationId: updateNote
+      tags: [notes]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNoteRequest'
+            example:
+              text: "Buy groceries and milk"
+      responses:
+        '200':
+          description: The updated note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      summary: Delete a note
+      operationId: deleteNote
+      tags: [notes]
+      responses:
+        '204':
+          description: Note deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  parameters:
+    NoteId:
+      name: noteId
+      in: path
+      required: true
+      description: UUID of the note
+      schema:
+        type: string
+        format: uuid
+      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+
+  schemas:
+    CreateNoteRequest:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+          description: Content of the note
+          example: "Buy groceries"
+
+    UpdateNoteRequest:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+          description: Replacement content for the note
+          example: "Buy groceries and milk"
+
+    CreateNoteResponse:
+      type: object
+      required: [noteId]
+      properties:
+        noteId:
+          type: string
+          format: uuid
+          description: UUID assigned to the newly created note
+
+    NoteResponse:
+      type: object
+      required: [noteId, text, createdAt, updatedAt]
+      properties:
+        noteId:
+          type: string
+          format: uuid
+          description: Unique identifier of the note
+        text:
+          type: string
+          description: Content of the note
+        createdAt:
+          type: string
+          format: date-time
+          description: ISO 8601 UTC timestamp when the note was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: ISO 8601 UTC timestamp when the note was last updated
+
+    ErrorDetail:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string
+          description: Human-readable error message
+          example: "Note not found"
+
+  responses:
+    NotFound:
+      description: The requested note was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDetail'
+          example:
+            detail: "Note not found"
+
+    UnprocessableEntity:
+      description: Request body failed validation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    loc:
+                      type: array
+                      items:
+                        type: string
+                    msg:
+                      type: string
+                    type:
+                      type: string

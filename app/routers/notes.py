@@ -27,6 +27,14 @@ def list_notes():
     return [NoteResponse(**n.model_dump()) for n in _repo.scan()]
 
 
+@router.get("/{note_id}", response_model=NoteResponse)
+def get_note(note_id: str):
+    note = _repo.get_item(note_id)
+    if note is None:
+        raise HTTPException(status_code=404, detail="Note not found")
+    return NoteResponse(**note.model_dump())
+
+
 @router.patch("/{note_id}", response_model=NoteResponse)
 def update_note(note_id: str, body: UpdateNoteRequest):
     note = _repo.update_item(note_id, body.text)
