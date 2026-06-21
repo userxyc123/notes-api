@@ -1,4 +1,4 @@
-name: Build and push to Amazon ECR
+name: Build, push, and deploy to Amazon ECS
 
 on:
   push:
@@ -14,6 +14,10 @@ env:
   AWS_REGION: us-east-1
   ECR_REGISTRY: 017820702794.dkr.ecr.us-east-1.amazonaws.com
   ECR_REPOSITORY: notes/notes-api
+  ECS_CLUSTER: userxyc123
+  ECS_SERVICE: notes-api-service
+  ECS_TASK_DEFINITION: notes-api
+  CONTAINER_NAME: notes-api
 
 jobs:
   build-and-push:
@@ -47,3 +51,24 @@ jobs:
             ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ env.ECS_TASK_DEFINITION }} \
+            --query taskDefinition > task-definition.json
+
+      - name: Update image in task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
