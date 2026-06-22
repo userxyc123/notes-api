@@ -14,8 +14,8 @@ env:
   AWS_REGION: us-east-1
   ECR_REGISTRY: 017820702794.dkr.ecr.us-east-1.amazonaws.com
   ECR_REPOSITORY: notes/notes-api
-  ECS_CLUSTER: userxyc123
-  ECS_SERVICE: notes-api-service
+  ECS_CLUSTER: default
+  ECS_SERVICE: notes-api-07de
   ECS_TASK_DEFINITION: generic-family-name
   CONTAINER_NAME: notes-api
 
