@@ -17,7 +17,7 @@ env:
   ECS_CLUSTER: default
   ECS_SERVICE: notes-api-07de
   ECS_TASK_DEFINITION: generic-family-name
-  CONTAINER_NAME: notes-api
+  CONTAINER_NAME: Main
 
 jobs:
   build-and-push:
