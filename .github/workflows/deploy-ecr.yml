@@ -16,7 +16,7 @@ env:
   ECR_REPOSITORY: notes/notes-api
   ECS_CLUSTER: userxyc123
   ECS_SERVICE: notes-api-service
-  ECS_TASK_DEFINITION: notes-api
+  ECS_TASK_DEFINITION: generic-family-name
   CONTAINER_NAME: notes-api
 
 jobs:
