@@ -16,7 +16,7 @@ env:
   ECR_REPOSITORY: notes/notes-api
   ECS_CLUSTER: default
   ECS_SERVICE: notes-api-07de
-  ECS_TASK_DEFINITION: generic-family-name
+  ECS_TASK_DEFINITION: default-notes-api-07de
   CONTAINER_NAME: Main
 
 jobs:
